@@ -35,6 +35,15 @@ const run = async() => {
             res.send(result);
         });
 
+        // read single data by id
+        app.get('/services/single/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const cursor = serviceCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
         // write data to mongodb
         // app.post('/users', async(req, res) => {
         //     const user = req.body;
