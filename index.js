@@ -17,6 +17,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 const run = async() => {
     try{
         const serviceCollection = client.db('CoffeeTreat').collection('services');
+        const reviewCollection = client.db('CoffeeTreat').collection('reviews');
 
         // read limited number data from mongodb
         app.get('/services/:count', async(req, res) => {
@@ -41,8 +42,39 @@ const run = async() => {
             const query = {_id: ObjectId(id)};
             const cursor = serviceCollection.find(query);
             const result = await cursor.toArray();
+            const cursor2 = reviewCollection.find({ serviceId: id }).sort({ _id: -1 });
+            const result2 = await cursor2.toArray();
+            res.send({
+                message: 'done',
+                service: result,
+                reviews: result2
+            })
+        });
+
+        // read all reviews from mongodb
+        app.get('/reviews', async(req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
             res.send(result);
         });
+
+        // read all reviews by service id
+        app.get('/reviews/:serviceId', async(req, res) => {
+            const serviceId = req.params.serviceId;
+            const query = {serviceId, serviceId};
+            const cursor = reviewCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+        // write all review to mongodb
+        app.post('/reviews', async(req, res) => {
+            const review = req.body;
+            console.log(review);
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
 
         // write data to mongodb
         // app.post('/users', async(req, res) => {
